@@ -28,6 +28,8 @@ namespace obj2ramses
         bool importFromFile(const std::string& objFile);
 
     private:
+        void createDummyScene();
+
         ramses::RamsesClient& m_client;
         ramses::Scene& m_scene;
     };
