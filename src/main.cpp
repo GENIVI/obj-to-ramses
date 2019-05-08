@@ -6,6 +6,8 @@
 //  file, You can obtain one at https://mozilla.org/MPL/2.0/.
 //  -------------------------------------------------------------------------
 
+#include "ObjImporter.h"
+
 #include "ramses-client-api/Scene.h"
 #include "ramses-framework-api/RamsesFramework.h"
 #include "ramses-client-api/RamsesClient.h"
@@ -47,6 +49,9 @@ int main(int argc, char* argv[])
     const char* sceneName = "The Scene";
     ramses::SceneConfig sceneConfig;
     ramses::Scene* scene = client.createScene(sceneId, sceneConfig, sceneName);
+
+    obj2ramses::ObjImporter objImporter(client, *scene);
+    objImporter.importFromFile("res/test.obj");
 
     ramses::status_t status = client.validate();
 
