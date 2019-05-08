@@ -39,7 +39,6 @@ int main(int argc, char* argv[])
     uint32_t screenWidth = 1200U;
     uint32_t screenHeight = 800U;
     displayConfig.setWindowRectangle(0, 0, screenWidth, screenHeight);
-    displayConfig.setPerspectiveProjection(17.06f, float(screenWidth) / screenHeight, 1.0f, 10000.0f);
     const ramses::displayId_t display = renderer.createDisplay(displayConfig);
 
     framework.connect();
