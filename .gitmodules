@@ -1,0 +1,3 @@
+[submodule "ramses-sdk"]
+	path = external/ramses-sdk
+	url = https://github.com/GENIVI/ramses.git
