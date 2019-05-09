@@ -11,6 +11,16 @@
 
 #include <string>
 
+#include "ObjGeometry.h"
+
+using std::string;
+using std::vector;
+
+using obj2ramses::ObjGeometry::vertex3f;
+using obj2ramses::ObjGeometry::tex_coord_3f;
+using obj2ramses::ObjGeometry::vertex_normal_3f;
+using obj2ramses::ObjGeometry::face;
+
 namespace ramses
 {
     class RamsesClient;
@@ -32,6 +42,14 @@ namespace obj2ramses
 
         ramses::RamsesClient& m_client;
         ramses::Scene& m_scene;
+
+        vector<vertex3f> vertices;
+        vector<tex_coord_3f> tex_coords;
+        vector<vertex_normal_3f> normals;
+        vector<face> faces;
+
+        std::vector<string> tokenize(string line, char delim = ' ');
+
     };
 }
 

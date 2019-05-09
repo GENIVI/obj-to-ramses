@@ -10,7 +10,13 @@
 
 #include <iostream>
 #include <fstream>
+#include <sstream>
+#include <string>
+#include <vector>
+#include <iterator>
+
 #include "ramses-client.h"
+#include "ObjGeometry.h"
 
 namespace obj2ramses
 {
@@ -20,22 +26,123 @@ namespace obj2ramses
     {
     }
 
+    /**
+     * @brief Imports geometry from a .obj file, loading it into the importer.
+     *
+     * @param objFile
+     * @return false if the file cannot be opened e.g. if the stream's bad bit is set.
+     */
     bool ObjImporter::importFromFile(const std::string& objFile)
     {
         // Import OBJ data and put into ramses scene
-        std::ifstream objFileStream(objFile);
+        std::ifstream f{objFile};
+        string line;
 
-        std::string line;
-        while (objFileStream) {
-            std::getline(objFileStream, line);
-            std::cout << line << "\n";
+        if (f.bad())
+            return false;
+
+        while (std::getline(f, line)) {
+            std::istringstream iss{line};
+            vector<string> tokens = this->tokenize(line,' ');
+
+            string dtype = tokens[0];
+
+            if (dtype == "v") {
+
+                vertex3f v;
+                v.x = std::stof(tokens[1]);
+                v.y = std::stof(tokens[2]);
+                v.z = std::stof(tokens[3]);
+                this->vertices.push_back(v);
+
+            } else if (dtype == "vt") {
+                tex_coord_3f vt;
+                vt.u = std::stof(tokens[1]);
+
+                if (tokens.size() >= 3 ){
+                    vt.v = std::stof(tokens[2]);
+                }
+
+                if(tokens.size() >= 4){
+                    vt.w = std::stof(tokens[3]);
+                }
+
+                this->tex_coords.push_back(vt);
+
+
+            } else if (dtype == "vn") {
+                vertex_normal_3f vn;
+                vn.x = std::stof(tokens[1]);
+                vn.y = std::stof(tokens[2]);
+                vn.z = std::stof(tokens[3]);
+                this->normals.push_back(vn);
+
+            } else if (dtype == "f") {
+                bool has_double_slash = line.find("//") != std::string::npos;
+                bool has_slash = line.find("/") != std::string::npos;
+                face f;
+                vector<unsigned> v, vt, vn;
+
+                if(has_double_slash){
+                    auto pos = line.find("//");
+                    line.erase(pos); /* get rid of it and keep processing */
+                }
+
+                if (has_slash) {
+                    vector<string> face_tokens = this->tokenize(line, ' ');
+                    face f;
+                    f.len = face_tokens.size() - 1; /* do not count the 'f' char */
+
+                    for(int i = 1; i < face_tokens.size(); ++i){
+                        vector<string> face_items = this->tokenize(face_tokens[i], '/');
+
+                        f.v.push_back(std::stoul(face_items[0]));
+
+                        if (face_items.size() > 1)
+                            f.vt.push_back(has_double_slash ? -1 : std::stoul(face_items[1]));
+
+                        if(face_items.size() > 2) {
+                            auto vn_index = (has_double_slash) ? 1 : 2;
+                            f.vn.push_back(std::stoul(face_items[vn_index]));
+                        }
+
+                    }
+
+                    this->faces.push_back(f);
+
+
+                }
+
+            } else {
+                std::cerr << "Skipping: This code can only handle v, vt, vn and f, but got this instead: " << dtype << std::endl;
+            }
         }
-        objFileStream.close();
 
         // TODO remove after obj can be imported
         createDummyScene();
 
         return true;
+    }
+
+    std::vector<string>
+    ObjImporter::tokenize(string line, char delim)
+    {
+        std::istringstream iss{line};
+
+        if (delim == ' '){
+            vector<string> tokens(std::istream_iterator<std::string>{iss},
+                                  std::istream_iterator<std::string>());
+            return tokens;
+        }
+
+        std::string item;
+        std::vector<std::string> tokens;
+        while (std::getline(iss, item, delim))
+        {
+            tokens.push_back(item);
+        }
+
+        return tokens;
     }
 
     void ObjImporter::createDummyScene()
