@@ -38,7 +38,7 @@ set(ramses_dependencies
     ramses-framework)
 
 add_executable(obj2ramses ${source_files})
-target_link_libraries(obj2ramses ${ramses_dependencies})
+target_link_libraries(obj2ramses ${ramses_dependencies} -lpthread)
 target_include_directories(obj2ramses PRIVATE src/include)
 
 add_definitions(-DRAMSES_LINK_STATIC)
