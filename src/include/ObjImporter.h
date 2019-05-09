@@ -10,6 +10,7 @@
 #define OBJ2RAMSES_OBJIMPORTER
 
 #include <string>
+#include <array>
 
 #include "ObjGeometry.h"
 
@@ -37,6 +38,8 @@ namespace obj2ramses
 
         bool importFromFile(const std::string& objFile);
 
+        void asRamsesScene();
+
     private:
         void createDummyScene();
 
@@ -49,6 +52,10 @@ namespace obj2ramses
         vector<face> faces;
 
         std::vector<string> tokenize(string line, char delim = ' ');
+
+        int computeIndexCount();
+        vector<uint16_t> getIndexArray();
+        vector<float> getVertexArray();
 
     };
 }

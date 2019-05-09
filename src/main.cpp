@@ -50,7 +50,9 @@ int main(int argc, char* argv[])
     ramses::Scene* scene = client.createScene(sceneId, sceneConfig, sceneName);
 
     obj2ramses::ObjImporter objImporter(client, *scene);
-    objImporter.importFromFile("res/test.obj");
+    objImporter.importFromFile("res/suzanne.obj");
+
+    objImporter.asRamsesScene();
 
     ramses::status_t status = client.validate();
 
