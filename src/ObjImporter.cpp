@@ -97,14 +97,14 @@ namespace obj2ramses
                     for(int i = 1; i < face_tokens.size(); ++i){
                         vector<string> face_items = this->tokenize(face_tokens[i], '/');
 
-                        f.v.push_back(std::stoul(face_items[0]));
+                        f.v.push_back(std::stoul(face_items[0]) - 1);
 
                         if (face_items.size() > 1)
-                            f.vt.push_back(has_double_slash ? -1 : std::stoul(face_items[1]));
+                            f.vt.push_back(has_double_slash ? -1 : std::stoul(face_items[1]) - 1);
 
                         if(face_items.size() > 2) {
                             auto vn_index = (has_double_slash) ? 1 : 2;
-                            f.vn.push_back(std::stoul(face_items[vn_index]));
+                            f.vn.push_back(std::stoul(face_items[vn_index]) - 1);
                         }
 
                     }
