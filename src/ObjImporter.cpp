@@ -259,17 +259,17 @@ void main(void)
         ramses::GeometryBinding* geometry = m_scene.createGeometryBinding(*effect);
 
         int index_sz = computeIndexCount();
-        const uint16_t *indices = getIndexArray().data();
+        auto indices = getIndexArray();
 
-        const ramses::UInt16Array* rIdxArray = m_client.createConstUInt16Array(index_sz, indices);
+        const ramses::UInt16Array* rIdxArray = m_client.createConstUInt16Array(index_sz, indices.data());
         geometry->setIndices(*rIdxArray);
 
         ramses::AttributeInput positionsInput;
         effect->findAttributeInput("a_position", positionsInput);
 
-        const float* vertexData = getVertexArray().data();
+        auto vertexData = getVertexArray();
 
-        const ramses::Vector3fArray* rVertexData = m_client.createConstVector3fArray(vertices.size(), vertexData);
+        const ramses::Vector3fArray* rVertexData = m_client.createConstVector3fArray(vertices.size(), vertexData.data());
         geometry->setInputBuffer(positionsInput, *rVertexData);
 
 
