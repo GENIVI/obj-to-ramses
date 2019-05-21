@@ -218,16 +218,8 @@ void main(void)
     }
 
 
-    void ObjImporter::asRamsesScene()
+    ramses::RenderGroup* ObjImporter::getRamsesRenderGroup()
     {
-
-        // every scene needs a render pass with camera
-        ramses::Camera* camera = m_scene.createRemoteCamera("my camera");
-        ramses::RenderPass* renderPass = m_scene.createRenderPass("my render pass");
-        renderPass->setClearFlags(ramses::EClearFlags_None);
-        renderPass->setCamera(*camera);
-        ramses::RenderGroup* renderGroup = m_scene.createRenderGroup();
-        renderPass->addRenderGroup(*renderGroup);
 
         std::string vertexShader = R"shader(
         #version 300 es
@@ -281,19 +273,19 @@ void main(void)
         geometry->setInputBuffer(positionsInput, *rVertexData);
 
 
-        ramses::MeshNode* meshNode = m_scene.createMeshNode();
+        ramses::MeshNode* meshNode = m_scene.createMeshNode("Suzanne");
         meshNode->setAppearance(*appearance);
         meshNode->setGeometryBinding(*geometry);
+
         // mesh needs to be added to a render group that belongs to a render pass with camera in order to be rendered
+        ramses::RenderGroup* renderGroup = m_scene.createRenderGroup();
         renderGroup->addMeshNode(*meshNode);
 
         ramses::UniformInput colorInput;
         effect->findUniformInput("color", colorInput);
         appearance->setInputValueVector4f(colorInput, 0.9f, 0.0f, 0.0f, 1.0);
 
-        appearance->setDrawMode(ramses::EDrawMode_Lines); /* TODO: Remove this, I just find it easier to debug */
-
-
+        return renderGroup;
     }
 
     int ObjImporter::computeIndexCount()

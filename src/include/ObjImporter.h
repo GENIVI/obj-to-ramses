@@ -13,6 +13,7 @@
 #include <array>
 
 #include "ObjGeometry.h"
+#include "ramses-client-api/RenderGroup.h"
 
 using std::string;
 using std::vector;
@@ -38,7 +39,7 @@ namespace obj2ramses
 
         bool importFromFile(const std::string& objFile);
 
-        void asRamsesScene();
+        ramses::RenderGroup* getRamsesRenderGroup();
 
     private:
         void createDummyScene();

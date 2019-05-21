@@ -13,9 +13,12 @@
 #include "ramses-renderer-api/DisplayConfig.h"
 #include "ramses-renderer-api/IRendererEventHandler.h"
 
+#include "ramses-client-api/Camera.h"
+
 #include <chrono>
 #include <thread>
 #include <unordered_set>
+#include <iostream>
 
 
 namespace obj2ramses
@@ -23,8 +26,8 @@ namespace obj2ramses
     class SceneStateEventHandler : public ramses::RendererEventHandlerEmpty
     {
     public:
-        SceneStateEventHandler(ramses::RamsesRenderer& renderer)
-            : m_renderer(renderer)
+        SceneStateEventHandler(ramses::RamsesRenderer& renderer, ramses::Camera& camera)
+            : m_renderer(renderer), m_camera(camera)
         {
         }
 
@@ -70,7 +73,7 @@ namespace obj2ramses
             }
         }
 
-        virtual void displayCreated(ramses::displayId_t displayId, ramses::ERendererEventResult result)
+        virtual void displayCreated(ramses::displayId_t displayId, ramses::ERendererEventResult result) override
         {
             if (result == ramses::ERendererEventResult_OK)
             {
@@ -78,9 +81,43 @@ namespace obj2ramses
             }
         }
 
-        virtual void windowClosed(ramses::displayId_t)
+        virtual void windowClosed(ramses::displayId_t) override
         {
             m_windowWasClosed = true;
+        }
+
+        virtual void keyEvent(ramses::displayId_t displayId, ramses::EKeyEvent eventType, uint32_t keyModifiers, ramses::EKeyCode keyCode) override
+        {
+
+            switch(keyCode)
+            {
+                case ramses::EKeyCode_W:
+                m_camera.translate(1.0f, 0.0f, 0.0f);  break;
+
+                case ramses::EKeyCode_S:
+                m_camera.translate(-1.0f, 0.0f, 0.0f); break;
+
+                case ramses::EKeyCode_A:
+                m_camera.translate(0.0f, -1.0f, 0.0f); break;
+
+                case ramses::EKeyCode_D:
+                m_camera.translate(0.0f, 1.0f, 0.0f);  break;
+            }
+        }
+
+        virtual void mouseEvent(ramses::displayId_t displayId, ramses::EMouseEvent eventType, int32_t mousePosX, int32_t mousePosY) override
+        {
+            int32_t deltaX = mousePosX - m_MouseLastX;
+            int32_t deltaY = mousePosY - m_MouseLastY;
+            float sensitivity = 0.1f;
+
+            float pitch = sensitivity * deltaX;
+            float yaw = sensitivity * deltaY;
+
+            m_camera.rotate(pitch, yaw, 0.0f);
+
+            m_MouseLastX = mousePosX;
+            m_MouseLastY = mousePosY;
         }
 
         void waitForDisplayCreation(const ramses::displayId_t display)
@@ -129,8 +166,12 @@ namespace obj2ramses
         SceneSet m_mappedScenes;
 
         ramses::RamsesRenderer& m_renderer;
+        ramses::Camera& m_camera;
         ramses::displayId_t m_lastDisplayCreated = ramses::InvalidDisplayId;
         bool m_windowWasClosed = false;
+
+        int32_t m_MouseLastX = 0;
+        int32_t m_MouseLastY = 0;
     };
 }
 

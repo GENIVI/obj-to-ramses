@@ -13,6 +13,10 @@
 #include "ramses-client-api/RamsesClient.h"
 #include "ramses-client-api/ResourceFileDescriptionSet.h"
 #include "ramses-client-api/ResourceFileDescription.h"
+#include "ramses-client-api/Camera.h"
+#include "ramses-client-api/LocalCamera.h"
+#include "ramses-client-api/PerspectiveCamera.h"
+#include "ramses-client-api/RenderPass.h"
 
 #include "Utils/RamsesLogger.h"
 #include "RendererEventHandler.h"
@@ -37,8 +41,9 @@ int main(int argc, char* argv[])
 
     ramses::DisplayConfig displayConfig;
     uint32_t screenWidth = 1200U;
-    uint32_t screenHeight = 800U;
-    displayConfig.setWindowRectangle(0, 0, screenWidth, screenHeight);
+    uint32_t screenHeight = 480U;
+    displayConfig.setWindowRectangle(0, 0, 1280U, 480U);
+    //displayConfig.setPerspectiveProjection(19.f, 1200U/480U, 0.1f, 1500.f);
     const ramses::displayId_t display = renderer.createDisplay(displayConfig);
 
     framework.connect();
@@ -52,7 +57,20 @@ int main(int argc, char* argv[])
     obj2ramses::ObjImporter objImporter(client, *scene);
     objImporter.importFromFile("res/suzanne.obj");
 
-    objImporter.asRamsesScene();
+    // every scene needs a render pass with camera
+    const char* CAMERA_NAME = "Default Camera";
+
+    ramses::PerspectiveCamera* camera = scene->createPerspectiveCamera(CAMERA_NAME);
+    camera->setFrustum(19.f, 1280.f/480.f, 0.1f, 1500.f);
+    camera->setViewport(1280U, 480U, 1280U, 480U);
+    ramses::RenderPass* renderPass = scene->createRenderPass("my render pass");
+    renderPass->setClearFlags(ramses::EClearFlags_None);
+    renderPass->setCamera(*camera);
+
+    ramses::RenderGroup* renderGroup = objImporter.getRamsesRenderGroup();
+    renderPass->addRenderGroup(*renderGroup);
+
+
 
     ramses::status_t status = client.validate();
 
@@ -74,7 +92,7 @@ int main(int argc, char* argv[])
     // Needed for visual debugging tools
     renderer.setSkippingOfUnmodifiedBuffers(false);
 
-    obj2ramses::SceneStateEventHandler eventHandler(renderer);
+    obj2ramses::SceneStateEventHandler eventHandler(renderer, *camera);
 
     eventHandler.waitForPublication(sceneId);
 
