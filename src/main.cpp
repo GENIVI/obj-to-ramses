@@ -71,8 +71,6 @@ int main(int argc, char* argv[])
     ramses::RenderGroup* renderGroup = objImporter.getRamsesRenderGroup();
     renderPass->addRenderGroup(*renderGroup);
 
-
-
     ramses::status_t status = client.validate();
 
     if (ramses::StatusOK != status)
@@ -112,6 +110,7 @@ int main(int argc, char* argv[])
     {
         std::this_thread::sleep_for(std::chrono::milliseconds(15));
         renderer.dispatchEvents(eventHandler);
+        scene->flush();
     }
 
     return 0;
