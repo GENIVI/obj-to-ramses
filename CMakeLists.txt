@@ -21,11 +21,14 @@ file(GLOB source_files
     src/include/*.h
 )
 
+
 if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     set(RND_PLATFORM platform-windows-wgl-4-2-core)
+    set(additional_deps "")
 elseif(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
     # TODO add support for other backends on Linux, e.g. Wayland
     set(RND_PLATFORM platform-x11-egl-es-3-0)
+    set(additional_deps "pthread")
 endif()
 
 set(ramses_dependencies
@@ -38,7 +41,7 @@ set(ramses_dependencies
     ramses-framework)
 
 add_executable(obj2ramses ${source_files})
-target_link_libraries(obj2ramses ${ramses_dependencies} -lpthread)
+target_link_libraries(obj2ramses ${ramses_dependencies} ${additional_deps})
 target_include_directories(obj2ramses PRIVATE src/include)
 
 add_definitions(-DRAMSES_LINK_STATIC)

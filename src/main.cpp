@@ -40,9 +40,9 @@ int main(int argc, char* argv[])
     renderer.startThread();
 
     ramses::DisplayConfig displayConfig;
-    uint32_t screenWidth = 1200U;
+    uint32_t screenWidth = 1280U;
     uint32_t screenHeight = 480U;
-    displayConfig.setWindowRectangle(0, 0, 1280U, 480U);
+    displayConfig.setWindowRectangle(0, 0, screenWidth, screenHeight);
     //displayConfig.setPerspectiveProjection(19.f, 1200U/480U, 0.1f, 1500.f);
     const ramses::displayId_t display = renderer.createDisplay(displayConfig);
 
@@ -61,16 +61,15 @@ int main(int argc, char* argv[])
     const char* CAMERA_NAME = "Default Camera";
 
     ramses::PerspectiveCamera* camera = scene->createPerspectiveCamera(CAMERA_NAME);
-    camera->setFrustum(19.f, 1280.f/480.f, 0.1f, 1500.f);
-    camera->setViewport(1280U, 480U, 1280U, 480U);
+    camera->setFrustum(19.f, static_cast<float>(screenWidth)/screenHeight, 0.1f, 1500.f);
+    camera->setViewport(0U, 0U, screenWidth, screenHeight);
     ramses::RenderPass* renderPass = scene->createRenderPass("my render pass");
     renderPass->setClearFlags(ramses::EClearFlags_None);
     renderPass->setCamera(*camera);
+    camera->setTranslation(0, 0, 5);
 
     ramses::RenderGroup* renderGroup = objImporter.getRamsesRenderGroup();
     renderPass->addRenderGroup(*renderGroup);
-
-
 
     ramses::status_t status = client.validate();
 
@@ -111,6 +110,7 @@ int main(int argc, char* argv[])
     {
         std::this_thread::sleep_for(std::chrono::milliseconds(15));
         renderer.dispatchEvents(eventHandler);
+        scene->flush();
     }
 
     return 0;

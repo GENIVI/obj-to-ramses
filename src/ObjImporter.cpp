@@ -94,7 +94,7 @@ namespace obj2ramses
                     face f;
                     f.len = face_tokens.size() - 1; /* do not count the 'f' char */
 
-                    for(int i = 1; i < face_tokens.size(); ++i){
+                    for(size_t i = 1; i < face_tokens.size(); ++i){
                         vector<string> face_items = this->tokenize(face_tokens[i], '/');
 
                         f.v.push_back(std::stoul(face_items[0]) - 1);
@@ -225,11 +225,14 @@ void main(void)
         #version 300 es
 
         in vec3 a_position;
+        uniform highp mat4 u_MMatrix;
+        uniform highp mat4 u_VMatrix;
+        uniform highp mat4 u_PMatrix;
 
         void main()
         {
             // z = -1.0, so that the geometry will not be clipped by the near plane of the camera
-            gl_Position = vec4(a_position.xy, -1.0, 1.0);
+            gl_Position = u_PMatrix * u_VMatrix * u_MMatrix * vec4(a_position.xyz, 1.0);
         }
         )shader";
 
@@ -252,6 +255,9 @@ void main(void)
         ramses::EffectDescription effectDesc;
         effectDesc.setVertexShader(vertexShader.c_str());
         effectDesc.setFragmentShader(fragmentShader.c_str());
+        effectDesc.setUniformSemantic("u_MMatrix", ramses::EEffectUniformSemantic_ModelMatrix);
+        effectDesc.setUniformSemantic("u_VMatrix", ramses::EEffectUniformSemantic_ViewMatrix);
+        effectDesc.setUniformSemantic("u_PMatrix", ramses::EEffectUniformSemantic_ProjectionMatrix);
 
         const ramses::Effect* effect = m_client.createEffect(effectDesc);
         ramses::Appearance* appearance = m_scene.createAppearance(*effect);
@@ -259,17 +265,17 @@ void main(void)
         ramses::GeometryBinding* geometry = m_scene.createGeometryBinding(*effect);
 
         int index_sz = computeIndexCount();
-        const uint16_t *indices = getIndexArray().data();
+        auto indices = getIndexArray();
 
-        const ramses::UInt16Array* rIdxArray = m_client.createConstUInt16Array(index_sz, indices);
+        const ramses::UInt16Array* rIdxArray = m_client.createConstUInt16Array(index_sz, indices.data());
         geometry->setIndices(*rIdxArray);
 
         ramses::AttributeInput positionsInput;
         effect->findAttributeInput("a_position", positionsInput);
 
-        const float* vertexData = getVertexArray().data();
+        auto vertexData = getVertexArray();
 
-        const ramses::Vector3fArray* rVertexData = m_client.createConstVector3fArray(vertices.size(), vertexData);
+        const ramses::Vector3fArray* rVertexData = m_client.createConstVector3fArray(vertices.size(), vertexData.data());
         geometry->setInputBuffer(positionsInput, *rVertexData);
 
 
