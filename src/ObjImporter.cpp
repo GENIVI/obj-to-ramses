@@ -225,11 +225,14 @@ void main(void)
         #version 300 es
 
         in vec3 a_position;
+        uniform highp mat4 u_MMatrix;
+        uniform highp mat4 u_VMatrix;
+        uniform highp mat4 u_PMatrix;
 
         void main()
         {
             // z = -1.0, so that the geometry will not be clipped by the near plane of the camera
-            gl_Position = vec4(a_position.xy, -1.0, 1.0);
+            gl_Position = u_PMatrix * u_VMatrix * u_MMatrix * vec4(a_position.xyz, 1.0);
         }
         )shader";
 
@@ -252,6 +255,9 @@ void main(void)
         ramses::EffectDescription effectDesc;
         effectDesc.setVertexShader(vertexShader.c_str());
         effectDesc.setFragmentShader(fragmentShader.c_str());
+        effectDesc.setUniformSemantic("u_MMatrix", ramses::EEffectUniformSemantic_ModelMatrix);
+        effectDesc.setUniformSemantic("u_VMatrix", ramses::EEffectUniformSemantic_ViewMatrix);
+        effectDesc.setUniformSemantic("u_PMatrix", ramses::EEffectUniformSemantic_ProjectionMatrix);
 
         const ramses::Effect* effect = m_client.createEffect(effectDesc);
         ramses::Appearance* appearance = m_scene.createAppearance(*effect);

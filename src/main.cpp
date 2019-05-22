@@ -66,6 +66,7 @@ int main(int argc, char* argv[])
     ramses::RenderPass* renderPass = scene->createRenderPass("my render pass");
     renderPass->setClearFlags(ramses::EClearFlags_None);
     renderPass->setCamera(*camera);
+    camera->setTranslation(0, 0, 5);
 
     ramses::RenderGroup* renderGroup = objImporter.getRamsesRenderGroup();
     renderPass->addRenderGroup(*renderGroup);
