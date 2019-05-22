@@ -94,7 +94,7 @@ namespace obj2ramses
                     face f;
                     f.len = face_tokens.size() - 1; /* do not count the 'f' char */
 
-                    for(int i = 1; i < face_tokens.size(); ++i){
+                    for(size_t i = 1; i < face_tokens.size(); ++i){
                         vector<string> face_items = this->tokenize(face_tokens[i], '/');
 
                         f.v.push_back(std::stoul(face_items[0]) - 1);
